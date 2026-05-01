@@ -1,6 +1,6 @@
 import os, logging
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 import httpx
 
@@ -11,9 +11,9 @@ MODE = os.getenv("PAYPAL_MODE", "sandbox")
 BASE = "https://api-m.paypal.com" if MODE == "live" else "https://api-m.sandbox.paypal.com"
 
 PLANS = {
-    "free": {"name": "Free", "price": 0, "features": ["5 swaps/day", "Standard quality"]},
-    "pro": {"name": "Pro", "price": 9.99, "paypal_plan_id": os.getenv("PAYPAL_PRO_PLAN_ID", ""), "features": ["Unlimited swaps", "HD quality", "No watermark"]},
-    "ultimate": {"name": "Ultimate", "price": 19.99, "paypal_plan_id": os.getenv("PAYPAL_ULTIMATE_PLAN_ID", ""), "features": ["Everything in Pro", "4K video", "API access", "Analytics"]},
+    "free": {"name": "Free Trial", "price": 0, "features": ["5 AI tasks/day", "Basic business tools", "Email support"]},
+    "pro": {"name": "Pro", "price": 14.99, "paypal_plan_id": os.getenv("PAYPAL_PRO_PLAN_ID", ""), "features": ["Unlimited AI tasks", "Business automation", "Priority support", "Custom workflows"]},
+    "ultimate": {"name": "Ultimate", "price": 29.99, "paypal_plan_id": os.getenv("PAYPAL_ULTIMATE_PLAN_ID", ""), "features": ["Everything in Pro", "Multi-business management", "API access", "Dedicated support", "Advanced analytics"]},
 }
 subs_db = {}
 router = APIRouter(prefix="/api/v1/subscriptions", tags=["subscriptions"])
@@ -33,8 +33,8 @@ async def pp_req(method, path, data=None):
 
 class SubCreate(BaseModel):
     plan: str = Field(..., pattern="^(pro|ultimate)$")
-    return_url: str = "https://madfaceshift.com/success"
-    cancel_url: str = "https://madfaceshift.com/cancel"
+    return_url: str = "https://madmadison.app/success"
+    cancel_url: str = "https://madmadison.app/cancel"
 
 @router.get("/plans")
 async def list_plans():
@@ -50,7 +50,7 @@ async def create_sub(body: SubCreate, user_id: str = "anonymous"):
     plan = PLANS.get(body.plan)
     if not plan or not plan.get("paypal_plan_id"):
         raise HTTPException(400, "Invalid plan")
-    result = await pp_req("POST", "/v1/billing/subscriptions", {"plan_id": plan["paypal_plan_id"], "application_context": {"brand_name": "MAD Madison", "shipping_preference": "NO_SHIPPING", "user_action": "SUBSCRIBE_NOW", "return_url": body.return_url, "cancel_url": body.cancel_url}})
+    result = await pp_req("POST", "/v1/billing/subscriptions", {"plan_id": plan["paypal_plan_id"], "application_context": {"brand_name": "MAD Madison AI Assistant", "shipping_preference": "NO_SHIPPING", "user_action": "SUBSCRIBE_NOW", "return_url": body.return_url, "cancel_url": body.cancel_url}})
     sid = result.get("id")
     url = next((l["href"] for l in result.get("links", []) if l["rel"] == "approve"), None)
     subs_db[user_id] = {"plan": body.plan, "status": "pending", "paypal_id": sid, "created": datetime.now(timezone.utc).isoformat()}
