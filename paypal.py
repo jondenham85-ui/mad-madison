@@ -1,3 +1,110 @@
-from fastapi import APIRouter
-router = APIRouter()
-webhook_router = APIRouter()
+import os,json,time,httpx
+from datetime import datetime,timezone
+from fastapi import APIRouter,HTTPException,Header,Request
+from pydantic import BaseModel
+PAYPAL_MODE=os.getenv("PAYPAL_MODE","sandbox")
+CLIENT_ID=os.getenv("PAYPAL_CLIENT_ID","")
+SECRET=os.getenv("PAYPAL_SECRET","")
+MAD_API_KEY=os.getenv("MAD_API_KEY","")
+SUBS_DB_PATH=os.getenv("SUBS_DB_PATH","/tmp/subs.json")
+PLANS_CACHE_PATH="/tmp/pp_plans.json"
+BASE_URL="https://api-m.paypal.com" if PAYPAL_MODE=="live" else "https://api-m.sandbox.paypal.com"
+def _load_subs():
+    try:
+        with open(SUBS_DB_PATH) as f: return json.load(f)
+    except: return {}
+def _save_subs(db):
+    with open(SUBS_DB_PATH,"w") as f: json.dump(db,f)
+subs_db=_load_subs()
+_tc={"token":None,"expires":0}
+async def pp_token():
+    if _tc["token"] and time.time()<_tc["expires"]: return _tc["token"]
+    async with httpx.AsyncClient() as c:
+        r=await c.post(f"{BASE_URL}/v1/oauth2/token",data={"grant_type":"client_credentials"},auth=(CLIENT_ID,SECRET))
+        r.raise_for_status()
+        d=r.json()
+        _tc["token"]=d["access_token"]
+        _tc["expires"]=time.time()+d["expires_in"]-60
+        return _tc["token"]
+async def pp_req(method,path,body=None):
+    token=await pp_token()
+    h={"Authorization":f"Bearer {token}","Content-Type":"application/json"}
+    async with httpx.AsyncClient() as c:
+        fn=getattr(c,method.lower())
+        kw={"headers":h}
+        if body: kw["json"]=body
+        r=await fn(f"{BASE_URL}{path}",**kw)
+        r.raise_for_status()
+        return r.json() if r.content else {}
+_pc={}
+async def ensure_plans():
+    global _pc
+    if _pc.get("pro") and _pc.get("ultimate"): return _pc
+    try:
+        with open(PLANS_CACHE_PATH) as f: cached=json.load(f)
+        if cached.get("pro") and cached.get("ultimate"):
+            _pc=cached
+            return _pc
+    except: pass
+    p=await pp_req("POST","/v1/catalogs/products",{"name":"MADFaceShift","type":"SERVICE","category":"SOFTWARE"})
+    pid=p["id"]
+    pro=await pp_req("POST","/v1/billing/plans",{"product_id":pid,"name":"Pro","billing_cycles":[{"frequency":{"interval_unit":"MONTH","interval_count":1},"tenure_type":"REGULAR","sequence":1,"total_cycles":0,"pricing_scheme":{"fixed_price":{"value":"14.99","currency_code":"USD"}}}],"payment_preferences":{"auto_bill_outstanding":True}})
+    ult=await pp_req("POST","/v1/billing/plans",{"product_id":pid,"name":"Ultimate","billing_cycles":[{"frequency":{"interval_unit":"MONTH","interval_count":1},"tenure_type":"REGULAR","sequence":1,"total_cycles":0,"pricing_scheme":{"fixed_price":{"value":"29.99","currency_code":"USD"}}}],"payment_preferences":{"auto_bill_outstanding":True}})
+    _pc={"pro":pro["id"],"ultimate":ult["id"],"product":pid}
+    with open(PLANS_CACHE_PATH,"w") as f: json.dump(_pc,f)
+    return _pc
+async def verify_api_key(x_api_key:str=Header(None)):
+    if MAD_API_KEY and x_api_key!=MAD_API_KEY: raise HTTPException(401,"Invalid API key")
+router=APIRouter(prefix="/api/v1/subscriptions")
+webhook_router=APIRouter(prefix="/api/v1/webhooks")
+class SubCreate(BaseModel):
+    plan:str
+    return_url:str="https://mad-madison-production.up.railway.app/success"
+    cancel_url:str="https://mad-madison-production.up.railway.app/cancel"
+@router.get("/plans")
+async def get_plans():
+    plans=await ensure_plans()
+    return {"free":{"price":0,"features":["5 swaps/day"]},"pro":{"price":14.99,"plan_id":plans.get("pro"),"features":["100 swaps/day","HD"]},"ultimate":{"price":29.99,"plan_id":plans.get("ultimate"),"features":["Unlimited","4K","Priority"]}}
+@router.get("/me")
+async def get_me(x_api_key:str=Header(None)):
+    await verify_api_key(x_api_key)
+    sub=subs_db.get("anonymous")
+    return sub if sub else {"status":"free","plan":None}
+@router.post("/create")
+async def create_sub(body:SubCreate,x_api_key:str=Header(None)):
+    await verify_api_key(x_api_key)
+    plans=await ensure_plans()
+    plan_id=plans.get(body.plan)
+    if not plan_id: raise HTTPException(400,"Plan not available")
+    result=await pp_req("POST","/v1/billing/subscriptions",{"plan_id":plan_id,"application_context":{"return_url":body.return_url,"cancel_url":body.cancel_url}})
+    sid=result["id"]
+    subs_db["anonymous"]={"sub_id":sid,"plan":body.plan,"status":"pending","created":datetime.now(timezone.utc).isoformat()}
+    _save_subs(subs_db)
+    approval=next((l["href"] for l in result.get("links",[]) if l["rel"]=="approve"),None)
+    return {"subscription_id":sid,"approval_url":approval}
+@router.post("/cancel")
+async def cancel_sub(x_api_key:str=Header(None)):
+    await verify_api_key(x_api_key)
+    sub=subs_db.get("anonymous")
+    if not sub or sub.get("status")!="active": raise HTTPException(404,"No active subscription")
+    await pp_req("POST",f"/v1/billing/subscriptions/{sub['sub_id']}/cancel",{"reason":"User requested"})
+    subs_db["anonymous"]["status"]="cancelled"
+    _save_subs(subs_db)
+    return {"cancelled":True}
+@webhook_router.post("/paypal")
+async def paypal_hook(req:Request):
+    body=await req.json()
+    event=body.get("event_type","")
+    resource=body.get("resource",{})
+    sid=resource.get("id") or resource.get("billing_agreement_id")
+    uid=None
+    if sid:
+        for u,s in subs_db.items():
+            if s.get("sub_id")==sid: uid=u; break
+    if uid:
+        if "ACTIVATED" in event: subs_db[uid]["status"]="active"
+        elif "CANCELLED" in event: subs_db[uid]["status"]="cancelled"
+        elif "SUSPENDED" in event: subs_db[uid]["status"]="suspended"
+        elif "PAYMENT.SALE" in event: subs_db[uid]["last_payment"]=datetime.now(timezone.utc).isoformat()
+        _save_subs(subs_db)
+    return {"received":True}
