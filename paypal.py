@@ -9,7 +9,7 @@ PAYPAL_ID = os.getenv("PAYPAL_CLIENT_ID", "")
 PAYPAL_SECRET = os.getenv("PAYPAL_SECRET", "")
 MODE = os.getenv("PAYPAL_MODE", "sandbox")
 BASE = "https://api-m.paypal.com" if MODE == "live" else "https://api-m.sandbox.paypal.com"
-APP_URL = os.getenv("APP_URL", "https://mad-madison-production.up.railway.app")
+APP_URL = os.getenv("APP_URL", "htps://mad-madison-production.up.railway.app")
 API_KEY = os.getenv("MAD_API_KEY", "")
 SUBS_FILE = os.getenv("SUBS_DB_PATH", "/tmp/subs.json")
 PLANS_FILE = "/tmp/pp_plans.json"
