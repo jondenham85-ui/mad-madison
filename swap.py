@@ -1,0 +1,57 @@
+import json, time, asyncio, base64
+import numpy as np
+import cv2
+from fastapi import APIRouter, UploadFile, File, Request, HTTPException
+USAGE = "/tmp/usage.json"
+router = APIRouter(prefix="/api/v1")
+_fa = None
+_swapper = None
+def get_models():
+    global _fa, _swapper
+    if _fa is None:
+        from insightface.app import FaceAnalysis
+        import insightface
+        _fa = FaceAnalysis(name="buffalo_l", providers=["CPUExecutionProvider"])
+        _fa.prepare(ctx_id=0, det_size=(640, 640))
+        _swapper = insightface.model_zoo.get_model("inswapper_128.onnx", download=True, download_zip=True)
+    return _fa, _swapper
+def check_limit(ip):
+    try:
+        u = json.load(open(USAGE))
+    except:
+        u = {}
+    k = ip + ":" + time.strftime("%Y-%m-%d")
+    c = u.get(k, 0)
+    if c >= 5:
+        return False
+    u[k] = c + 1
+    json.dump(u, open(USAGE, "w"))
+    return True
+def do_swap(src_bytes, tgt_bytes):
+    fa, swapper = get_models()
+    src = cv2.imdecode(np.frombuffer(src_bytes, np.uint8), cv2.IMREAD_COLOR)
+    tgt = cv2.imdecode(np.frombuffer(tgt_bytes, np.uint8), cv2.IMREAD_COLOR)
+    if src is None or tgt is None:
+        raise ValueError("Cannot decode image")
+    src_faces = fa.get(src)
+    tgt_faces = fa.get(tgt)
+    if not src_faces:
+        raise ValueError("No face in source image")
+    if not tgt_faces:
+        raise ValueError("No face in target image")
+    result = tgt.copy()
+    for face in tgt_faces:
+        result = swapper.get(result, face, src_faces[0], paste_back=True)
+    _, buf = cv2.imencode(".jpg", result, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    return base64.b64encode(bytes(buf)).decode()
+@router.post("/swap")
+async def face_swap(req: Request, source: UploadFile = File(...), target: UploadFile = File(...)):
+    if not check_limit(req.client.host or "x"):
+        raise HTTPException(429, "5 swaps/day reached. Upgrade to Pro!")
+    sb = await source.read()
+    tb = await target.read()
+    try:
+        b64 = await asyncio.get_event_loop().run_in_executor(None, do_swap, sb, tb)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return {"result_url": "data:image/jpeg;base64," + b64}
