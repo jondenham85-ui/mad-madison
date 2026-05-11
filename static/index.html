@@ -1,1 +1,196 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MADFaceShift AI - Best Face Swap App</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,sans-serif;background:#0a0a0f;color:#f0f0f0}header{padding:1rem 2rem;background:#0d0d1a;border-bottom:1px solid #1e1e3f;display:flex;justify-content:space-between;align-items:center}.logo{font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,#7c3aed,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hero{text-align:center;padding:4rem 1rem 2rem}.hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:900;background:linear-gradient(135deg,#7c3aed,#06b6d4,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:1rem}.hero p{color:#94a3b8;max-width:600px;margin:0 auto 2rem}.app{max-width:900px;margin:0 auto;padding:0 1rem 4rem}.uploads{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}@media(max-width:600px){.uploads{grid-template-columns:1fr}}.zone{border:2px dashed #374151;border-radius:1rem;padding:2rem;text-align:center;cursor:pointer;background:#111127;position:relative;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:border-color .2s}.zone:hover,.zone.drag{border-color:#7c3aed}.zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}.zone img{max-width:100%;max-height:140px;border-radius:.5rem;object-fit:cover}.sbtn{background:linear-gradient(135deg,#7c3aed,#06b6d4);color:#fff;width:100%;border:none;padding:1rem;border-radius:.75rem;font-size:1.1rem;font-weight:700;cursor:pointer;margin-top:1rem}.sbtn:disabled{opacity:.5}.result{margin-top:1.5rem;display:none;text-align:center}.result img{max-width:100%;border-radius:1rem;border:2px solid #7c3aed}.dl{margin-top:1rem;display:inline-block;padding:.6rem 1.5rem;background:#7c3aed;color:#fff;border-radius:.5rem;text-decoration:none;font-weight:700}.err{background:#2d1515;border:1px solid #dc2626;border-radius:.75rem;padding:1rem;margin-top:1rem;color:#fca5a5;display:none}.loading{display:none;text-align:center;padding:2rem}.spin{width:48px;height:48px;border:4px solid #1e1e3f;border-top-color:#7c3aed;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}@keyframes spin{to{transform:rotate(360deg)}}.quota{text-align:center;color:#64748b;font-size:.85rem;margin-top:.5rem}.pricing{max-width:900px;margin:0 auto;padding:0 1rem 4rem;text-align:center}.pricing h2{font-size:2rem;margin-bottom:.5rem}.sub{color:#64748b;margin-bottom:2rem}.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;text-align:left}@media(max-width:700px){.plans{grid-template-columns:1fr}}.plan{background:#111127;border:1px solid #1e1e3f;border-radius:1rem;padding:1.5rem;position:relative}.plan.pop{border-color:#7c3aed;box-shadow:0 0 30px rgba(124,58,237,.2)}.badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7c3aed,#06b6d4);color:#fff;font-size:.7rem;font-weight:700;padding:.2rem .9rem;border-radius:9999px}.pname{font-weight:700;margin-bottom:.25rem}.price{font-size:2rem;font-weight:900}.price span{font-size:.9rem;color:#64748b}.feats{list-style:none;margin:1rem 0}.feats li{padding:.3rem 0;color:#94a3b8;font-size:.9rem;border-bottom:1px solid #1e1e3f}.feats li:before{content:"v ";color:#10b981}.pbtn{width:100%;padding:.7rem;border-radius:.75rem;font-weight:700;border:none;cursor:pointer;margin-top:1rem;font-size:.95rem}.pfree{background:#1e1e3f;color:#f0f0f0}.ppro{background:linear-gradient(135deg,#7c3aed,#06b6d4);color:#fff}.pult{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff}footer{text-align:center;padding:2rem;color:#374151;font-size:.85rem;border-top:1px solid #1e1e3f}</style></head><body><header><div class="logo">MADFaceShift AI</div><div style="color:#64748b">Self-Hosted AI</div></header><div class="hero"><h1>The Best Face Swap App on the Internet</h1><p>Upload your face plus any photo. Our self-hosted AI swaps faces instantly. Free to try, no signup needed.</p></div><div class="app"><div class="uploads"><div><p style="margin-bottom:.5rem;font-weight:600;color:#94a3b8">YOUR FACE</p><div class="zone" id="z1"><input type="file" accept="image/*" id="f1" onchange="preview(this,'p1')"><div id="p1"><div style="font-size:2.5rem">face</div><div style="color:#64748b;font-size:.9rem;margin-top:.5rem">Tap or drag your photo here</div></div></div></div><div><p style="margin-bottom:.5rem;font-weight:600;color:#94a3b8">TARGET IMAGE</p><div class="zone" id="z2"><input type="file" accept="image/*" id="f2" onchange="preview(this,'p2')"><div id="p2"><div style="font-size:2.5rem">img</div><div style="color:#64748b;font-size:.9rem;margin-top:.5rem">Tap or drag target photo here</div></div></div></div></div><button class="sbtn" id="swapBtn" onclick="doSwap()" disabled>Swap Faces Now</button><p class="quota">5 free swaps per day - No signup required - Instant results</p><div class="loading" id="loading"><div class="spin"></div><p style="color:#94a3b8">Swapping faces... about 20 seconds</p></div><div class="err" id="err"></div><div class="result" id="result"><img id="rImg" src="" alt="Swapped Result"><br><a id="dlLink" class="dl" download="MADFaceShift.jpg">Download Result</a></div></div><div class="pricing"><h2>Simple Pricing</h2><p class="sub">Start free. Upgrade when you need more.</p><div class="plans"><div class="plan"><div class="pname">Free</div><div class="price">$0<span>/mo</span></div><ul class="feats"><li>5 swaps per day</li><li>Standard quality</li><li>No signup needed</li></ul><button class="pbtn pfree" onclick="document.getElementById('f1').click()">Try Free Now</button></div><div class="plan pop"><div class="badge">MOST POPULAR</div><div class="pname">Pro</div><div class="price">$14.99<span>/mo</span></div><ul class="feats"><li>100 swaps per day</li><li>HD quality output</li><li>Priority processing</li><li>Cancel anytime</li></ul><button class="pbtn ppro" onclick="sub('pro')">Get Pro</button></div><div class="plan"><div class="pname">Ultimate</div><div class="price">$29.99<span>/mo</span></div><ul class="feats"><li>Unlimited swaps</li><li>Max quality output</li><li>Fastest processing</li><li>Cancel anytime</li></ul><button class="pbtn pult" onclick="sub('ultimate')">Go Ultimate</button></div></div></div><footer><p>2026 MADFaceShift AI - The best face swap app on the internet</p></footer><script>let f1=null,f2=null;function preview(inp,pid){const file=inp.files[0];if(!file)return;pid==='p1'?f1=file:f2=file;const r=new FileReader();r.onload=e=>{document.getElementById(pid).innerHTML='<img src="'+e.target.result+'">';};r.readAsDataURL(file);document.getElementById('swapBtn').disabled=!(f1&&f2);}async function doSwap(){if(!f1||!f2)return;const btn=document.getElementById('swapBtn');btn.disabled=true;document.getElementById('loading').style.display='block';document.getElementById('result').style.display='none';document.getElementById('err').style.display='none';const fd=new FormData();fd.append('source',f1);fd.append('target',f2);try{const r=await fetch('/api/v1/swap',{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw new Error(d.detail||'Swap failed');document.getElementById('rImg').src=d.result_url;document.getElementById('dlLink').href=d.result_url;document.getElementById('result').style.display='block';}catch(e){const el=document.getElementById('err');el.textContent=e.message;el.style.display='block';}finally{document.getElementById('loading').style.display='none';btn.disabled=false;}}async function sub(plan){try{const r=await fetch('/api/v1/subscriptions/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan})});const d=await r.json();if(d.approval_url)window.location.href=d.approval_url;else alert('Error: '+JSON.stringify(d));}catch(e){alert(e.message);}}document.querySelectorAll('.zone').forEach(el=>{el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag')});el.addEventListener('dragleave',()=>el.classList.remove('drag'));el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('drag');const f=e.dataTransfer.files[0];if(!f)return;const inp=el.querySelector('input');const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;inp.dispatchEvent(new Event('change'));});});</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MADFaceShift AI - Swap Faces Instantly with AI</title>
+  <meta name="description" content="MADFaceShift AI is the fastest AI face swap app. Upload two photos, get a hyper-realistic swap in seconds. Free to try.">
+  <meta name="keywords" content="face swap, AI face swap, face replace, photo editor, MADFaceShift">
+  <link rel="canonical" href="https://mad-madison-production.up.railway.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mad-madison-production.up.railway.app/">
+  <meta property="og:title" content="MADFaceShift AI - Swap Faces Instantly with AI">
+  <meta property="og:description" content="The fastest AI face swap. Upload two photos, get a hyper-realistic result in seconds. Free to try!">
+  <meta property="og:image" content="https://mad-madison-production.up.railway.app/static/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MADFaceShift AI - Swap Faces Instantly with AI">
+  <meta name="twitter:description" content="The fastest AI face swap app. Free to try. Results in seconds!">
+  <meta name="twitter:image" content="https://mad-madison-production.up.railway.app/static/og-image.jpg">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#0d0d0f;--surface:#16161a;--border:#2a2a35;--accent:#7c3aed;--text:#f1f1f3;--muted:#888;--radius:14px}
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(13,13,15,.92);backdrop-filter:blur(12px);z-index:100}
+    .logo{font-size:1.4rem;font-weight:800;background:linear-gradient(90deg,#7c3aed,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-links a{color:var(--muted);text-decoration:none;margin-left:24px;font-size:.9rem;transition:color .2s}
+    .nav-links a:hover{color:var(--text)}
+    .hero{text-align:center;padding:80px 20px 48px}
+    .hero h1{font-size:clamp(2rem,5vw,3.8rem);font-weight:900;line-height:1.15;margin-bottom:20px}
+    .hero h1 span{background:linear-gradient(90deg,#7c3aed,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .hero p{font-size:1.15rem;color:var(--muted);max-width:560px;margin:0 auto 36px;line-height:1.65}
+    .badge{display:inline-block;background:rgba(124,58,237,.18);border:1px solid rgba(124,58,237,.4);color:#c4b5fd;padding:6px 16px;border-radius:999px;font-size:.8rem;font-weight:600;margin-bottom:24px;letter-spacing:.04em}
+    .tool{max-width:900px;margin:0 auto;padding:0 20px 80px}
+    .upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+    @media(max-width:600px){.upload-grid{grid-template-columns:1fr}}
+    .upload-zone{background:var(--surface);border:2px dashed var(--border);border-radius:var(--radius);padding:40px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .upload-zone:hover{border-color:var(--accent);background:rgba(124,58,237,.06)}
+    .upload-zone.has-file{border-style:solid;border-color:var(--accent)}
+    .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .upload-zone img.preview{max-width:100%;max-height:160px;border-radius:8px;object-fit:cover}
+    .upload-icon{font-size:2.5rem;margin-bottom:12px}
+    .upload-label{font-size:.85rem;color:var(--muted);margin-top:8px}
+    .upload-zone h3{font-size:1rem;font-weight:700;margin-bottom:6px}
+    .btn-swap{width:100%;padding:18px;font-size:1.1rem;font-weight:800;border:none;border-radius:var(--radius);background:linear-gradient(90deg,#7c3aed,#ec4899);color:#fff;cursor:pointer;transition:opacity .2s,transform .15s;letter-spacing:.02em;margin-bottom:28px}
+    .btn-swap:hover{opacity:.9;transform:translateY(-1px)}
+    .btn-swap:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .result-box{display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;text-align:center}
+    .result-box img{max-width:100%;border-radius:10px;margin-bottom:16px}
+    .btn-dl{display:inline-block;padding:12px 28px;background:linear-gradient(90deg,#7c3aed,#ec4899);color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.95rem}
+    .status-msg{text-align:center;color:var(--muted);font-size:.9rem;min-height:24px;margin-bottom:16px}
+    .status-msg.error{color:#f87171}
+    .pricing{background:var(--surface);border-top:1px solid var(--border);padding:80px 20px}
+    .pricing h2{text-align:center;font-size:2.2rem;font-weight:900;margin-bottom:12px}
+    .pricing .sub{text-align:center;color:var(--muted);margin-bottom:52px}
+    .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;max-width:900px;margin:0 auto}
+    .plan{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:32px 28px;display:flex;flex-direction:column;transition:border-color .2s,transform .2s}
+    .plan:hover{border-color:var(--accent);transform:translateY(-4px)}
+    .plan.popular{border-color:var(--accent);position:relative}
+    .plan.popular::before{content:'MOST POPULAR';position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#7c3aed,#ec4899);color:#fff;padding:4px 16px;border-radius:999px;font-size:.7rem;font-weight:800;letter-spacing:.06em}
+    .plan h3{font-size:1.2rem;font-weight:800;margin-bottom:8px}
+    .plan .price{font-size:2.4rem;font-weight:900;margin:12px 0}
+    .plan .price span{font-size:1rem;color:var(--muted);font-weight:400}
+    .plan ul{list-style:none;margin:20px 0 28px;flex:1}
+<body>
+<nav>
+  <div class="logo">MADFaceShift AI</div>
+  <div class="nav-links">
+    <a href="#tool">Try Free</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+</nav>
+<section class="hero">
+  <div class="badge">AI-POWERED FACE SWAP</div>
+  <h1>Swap Any Face<br><span>Instantly with AI</span></h1>
+  <p>Upload a source face and a target photo. Our AI swaps the faces in seconds — hyper-realistic results, no sign-up required.</p>
+</section>
+<div class="tool" id="tool">
+  <div class="upload-grid">
+    <div class="upload-zone" id="zone-src">
+      <input type="file" id="inp-src" accept="image/*">
+      <div class="upload-icon">&#128100;</div>
+      <h3>Source Face</h3>
+      <p class="upload-label">The face you want to transplant</p>
+    </div>
+    <div class="upload-zone" id="zone-tgt">
+      <input type="file" id="inp-tgt" accept="image/*">
+      <div class="upload-icon">&#128247;</div>
+      <h3>Target Photo</h3>
+      <p class="upload-label">The photo that gets the new face</p>
+    </div>
+  </div>
+  <div class="status-msg" id="status"></div>
+  <button class="btn-swap" id="btn-swap" disabled>&#9889; Swap Faces Now</button>
+  <div class="result-box" id="result-box">
+    <h3 style="margin-bottom:16px">Your Swap is Ready!</h3>
+    <img id="result-img" src="" alt="Face swap result">
+    <a class="btn-dl" id="btn-dl" href="#" download="madfaceshift-result.jpg">Download Result</a>
+  </div>
+</div>
+<section class="pricing" id="pricing">
+  <h2>Simple Pricing</h2>
+  <p class="sub">Start free. Upgrade when you need more.</p>
+  <div class="plans">
+    <div class="plan">
+      <h3>Free</h3>
+      <div class="price">$0<span>/mo</span></div>
+      <ul>
+        <li>5 swaps per day</li>
+        <li>Standard quality</li>
+        <li>No sign-up needed</li>
+      </ul>
+      <button class="btn-plan outline" onclick="document.getElementById('tool').scrollIntoView({behavior:'smooth'})">Start Free</button>
+    </div>
+    <div class="plan popular">
+      <h3>Pro</h3>
+      <div class="price">$14.99<span>/mo</span></div>
+      <ul>
+        <li>Unlimited swaps</li>
+        <li>HD quality output</li>
+        <li>Priority processing</li>
+        <li>No watermark</li>
+      </ul>
+      <button class="btn-plan filled" onclick="subscribe('pro')">Get Pro</button>
+    </div>
+    <div class="plan">
+      <h3>Ultimate</h3>
+      <div class="price">$29.99<span>/mo</span></div>
+      <ul>
+        <li>Everything in Pro</li>
+        <li>4K quality output</li>
+        <li>API access</li>
+        <li>Bulk processing</li>
+      </ul>
+      <button class="btn-plan filled" onclick="subscribe('ultimate')">Get Ultimate</button>
+    </div>
+  </div>
+</section>
+<footer>
+  <p>&copy; 2026 MADFaceShift AI. All rights reserved. | <a href="#">Privacy</a> | <a href="#">Terms</a></p>
+</footer>
+<button id="shareBtn" onclick="shareSite()">&#128279; Share &amp; Go Viral!</button>
+<script>
+const src=document.getElementById('inp-src'),tgt=document.getElementById('inp-tgt'),btn=document.getElementById('btn-swap'),status=document.getElementById('status'),resultBox=document.getElementById('result-box'),resultImg=document.getElementById('result-img'),btnDl=document.getElementById('btn-dl');
+function preview(input,zone){input.addEventListener('change',function(){const f=this.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{let img=zone.querySelector('img.preview');if(!img){img=document.createElement('img');img.className='preview';zone.appendChild(img);}img.src=e.target.result;zone.classList.add('has-file');};r.readAsDataURL(f);checkReady();});}
+preview(src,document.getElementById('zone-src'));
+preview(tgt,document.getElementById('zone-tgt'));
+function checkReady(){btn.disabled=!(src.files[0]&&tgt.files[0]);}
+function setStatus(msg,err){status.textContent=msg;status.className='status-msg'+(err?' error':'');}
+btn.addEventListener('click',async function(){
+  if(!src.files[0]||!tgt.files[0])return;
+  btn.disabled=true;setStatus('Swapping faces... please wait');
+  const fd=new FormData();
+  fd.append('source',src.files[0]);
+  fd.append('target',tgt.files[0]);
+  try{
+    const r=await fetch('/api/v1/swap',{method:'POST',body:fd});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.detail||'Swap failed');
+    const imgSrc='data:image/jpeg;base64,'+d.result;
+    resultImg.src=imgSrc;
+    btnDl.href=imgSrc;
+    resultBox.style.display='block';
+    resultBox.scrollIntoView({behavior:'smooth'});
+    setStatus('Done! Download your result below.');
+  }catch(e){setStatus(e.message,true);}
+  finally{btn.disabled=false;checkReady();}
+});
+async function subscribe(plan){
+  try{
+    const r=await fetch('/api/v1/subscriptions/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:plan,return_url:location.origin+'/success',cancel_url:location.origin+'/cancel'})});
+    const d=await r.json();
+    if(d.approval_url)window.location.href=d.approval_url;
+    else alert('Error: '+JSON.stringify(d));
+  }catch(e){alert('Could not start checkout: '+e.message);}
+}
+function shareSite(){
+  const url='https://mad-madison-production.up.railway.app';
+  const text='Just tried MADFaceShift AI - it swaps faces in seconds with AI! Try it free!';
+  if(navigator.share){navigator.share({title:'MADFaceShift AI',text:text,url:url});}else{window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(text)+'&url='+encodeURIComponent(url),'_blank');}
+}
+</script>
+</body>
+</html>
+    .plan ul li{padding:6px 0;font-size:.9rem;color:var(--muted)}
+    .plan ul li::before{content:'✓ ';color:#a78bfa;font-weight:700}
+    .btn-plan{padding:14px;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;border:none;text-align:center;transition:opacity .2s;width:100%}
+    .btn-plan.outline{background:transparent;border:2px solid var(--border);color:var(--text)}
+    .btn-plan.outline:hover{border-color:var(--accent)}
+    .btn-plan.filled{background:linear-gradient(90deg,#7c3aed,#ec4899);color:#fff}
+    .btn-plan.filled:hover{opacity:.88}
+    footer{text-align:center;padding:36px 20px;color:var(--muted);font-size:.82rem;border-top:1px solid var(--border)}
+    footer a{color:var(--muted)}
+    #shareBtn{position:fixed;bottom:24px;right:24px;z-index:999;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;border:none;border-radius:999px;padding:14px 22px;font-size:.9rem;font-weight:800;cursor:pointer;box-shadow:0 4px 24px rgba(124,58,237,.5);display:flex;align-items:center;gap:8px;transition:transform .2s,box-shadow .2s}
+    #shareBtn:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 8px 32px rgba(124,58,237,.6)}
+  </style>
+</head>
