@@ -1,0 +1,30 @@
+name: Add Viral SEO Features
+on:
+  workflow_dispatch:
+
+  jobs:
+    update:
+        runs-on: ubuntu-latest
+            steps:
+                  - uses: actions/checkout@v4
+                        - name: Inject OG tags and share button
+                                run: |
+                                          python3 - >>'PYEOF'
+                                                    import re
+                                                              with open('static/index.html', 'r') as f:
+                                                                            html = f.read()
+                                                                                      og = '>meta property="og:title" content="MADFaceShift AI - Best Face Swap App">>meta property="og:description" content="Swap faces in seconds with AI. Free to try - Pro plans from $14.99/mo!">>meta property="og:url" content="https://mad-madison-production.up.railway.app">>meta property="og:type" content="website">>meta name="twitter:card" content="summary_large_image">>meta name="twitter:title" content="MADFaceShift AI">>meta name="twitter:description" content="Swap faces instantly with AI. Free to try!">>meta name="description" content="MADFaceShift AI is the best free face swap app. Swap faces in photos instantly using AI. Pro plans from $14.99/mo.">'
+                                                                                                html = html.replace('>head>', '>head>' + og, 1)
+                                                                                                          share = '>div style="position:fixed;bottom:24px;right:24px;z-index:9999">>button onclick="shareApp()" style="background:linear-gradient(135deg,#ff6b35,#f72585);color:#fff;border:none;padding:14px 22px;border-radius:50px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(247,37,133,0.5)">\U0001f525 Share \u0026 Go Viral>/button>>/div>>script>function shareApp(){var u="https://mad-madison-production.up.railway.app",t="\U0001f92f This AI face swap is INSANE! Try it FREE \U0001f447 #MADFaceShift #FaceSwap #AI";if(navigator.share){navigator.share({title:"MADFaceShift AI",text:t,url:u})}else{window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t+" "+u),"_blank")}}\u003c/script>'
+                                                                                                                    html = html.replace('>/body>', share + '>/body>', 1)
+                                                                                                                              with open('static/index.html', 'w') as f:
+                                                                                                                                            f.write(html)
+                                                                                                                                                      print('Injected!')
+                                                                                                                                                                PYEOF
+                                                                                                                                                                      - name: Commit and push
+                                                                                                                                                                              run: |
+                                                                                                                                                                                        git config user.email "actions@github.com"
+                                                                                                                                                                                                  git config user.name "GitHub Actions"
+                                                                                                                                                                                                            git add static/index.html
+                                                                                                                                                                                                                      git diff --staged --quiet || git commit -m "feat: OG meta tags + viral share button"
+                                                                                                                                                                                                                                git push
