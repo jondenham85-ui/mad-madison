@@ -1,6 +1,7 @@
 {
   "version": 2,
   "framework": "nextjs",
+  "next": "14.2.3",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "functions": {
